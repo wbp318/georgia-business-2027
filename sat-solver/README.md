@@ -7,8 +7,9 @@ Nothing to do with container redemption. This folder holds two small SAT solvers
 | [sat3.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/sat3.py) | Plain backtracking search (DPLL) with unit propagation |
 | [cdcl.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/cdcl.py) | The same search with clause learning, backjumping, activity-based branching, phase saving, restarts, and learned-clause cleanup (CDCL), plus a counting check that runs once before search |
 | [structured.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/structured.py) | Runs both solvers on four families of structured problems |
+| [PARITY-PLAN.md](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/PARITY-PLAN.md) | The plan for the next step: a parity check using Gaussian elimination |
 
-All three are pure Python with no dependencies.
+All three programs are pure Python with no dependencies.
 
 ## Random formulas: what the test does
 
