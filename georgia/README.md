@@ -5,7 +5,7 @@ _Started November 22, 2026. This is a working brief, not yet a business plan: Ge
 ## The short version
 
 - **Georgia has no bottle deposit law.** Nobody pays a deposit, so there is nothing to redeem and no handling fee to earn yet.
-- **The opening is political.** Keisha Lance Bottoms was elected governor on November 3, 2026 and takes office in January 2027. The owner heard her include a bottle recycling program in a speech laying out what she intends to pass. We have not yet found that item in written coverage of her priorities, so its details are unknown ([issue #29](https://github.com/wbp318/maine-business-2027/issues/29)).
+- **The opening is political.** Keisha Lance Bottoms was elected governor on November 3, 2026 and takes office in January 2027. The owner heard her include a bottle recycling program in a speech laying out what she intends to pass. We have not yet found that item in written coverage of her priorities, so its details are unknown ([issue #29](https://github.com/wbp318/georgia-business-2027/issues/29)).
 - **The legislature is split.** Democrats won the House; Republicans kept the Senate. A deposit bill needs both.
 - **The design of the law decides everything.** Some deposit laws pay independent redemption centers a fee per container. Others have beverage producers run redemption themselves, which leaves little room for an independent operator.
 - **Deposits are years away even if a bill passes in 2027.** Last session's bill would have started deposits two years after it took effect.
@@ -63,15 +63,15 @@ flowchart TD
 
 ## What to do before there is a law
 
-1. **Pin down the proposal.** Find the speech and write down exactly what was said: deposit amount, who runs it, timing ([issue #29](https://github.com/wbp318/maine-business-2027/issues/29)).
+1. **Pin down the proposal.** Find the speech and write down exactly what was said: deposit amount, who runs it, timing ([issue #29](https://github.com/wbp318/georgia-business-2027/issues/29)).
 2. **Watch three places.** Pre-filed bills for the 2027 session, the Senate recycling study committee's report, and the transition's natural resources committee.
 3. **Read any bill for five things.** Deposit amount, who may redeem, whether a handling fee is set in statute, who keeps unclaimed deposits, and the start date.
-4. **Decide who runs it in Georgia.** The owner lives in Louisiana and the Maine plan depended on a local operator. A Georgia center needs one too ([issue #30](https://github.com/wbp318/maine-business-2027/issues/30)).
+4. **Decide who runs it in Georgia.** The owner lives in Louisiana and the Maine plan depended on a local operator. A Georgia center needs one too ([issue #30](https://github.com/wbp318/georgia-business-2027/issues/30)).
 5. **Spend nothing on sites yet.** Without the bill's text, no lease, entity, or equipment decision can be justified.
 
 ## What carries over from Maine
 
-The [archived Maine plan](https://github.com/wbp318/maine-business-2027/tree/main/maine) still holds for the parts that don't depend on the state:
+The [archived Maine plan](https://github.com/wbp318/georgia-business-2027/tree/main/maine) still holds for the parts that don't depend on the state:
 
 - **The money flow.** The deposit passes through; the only margin is a handling fee, if the law provides one.
 - **The unit economics.** About 4 million containers a year was the floor for a real return at 6¢. A different fee moves that floor.
@@ -82,4 +82,4 @@ The grants, internships, and side-business research in the Maine folder is Maine
 
 ## Open questions
 
-Tracked as [issues assigned to the owner](https://github.com/wbp318/maine-business-2027/issues?q=is%3Aopen+label%3Aquestion).
+Tracked as [issues assigned to the owner](https://github.com/wbp318/georgia-business-2027/issues?q=is%3Aopen+label%3Aquestion).
