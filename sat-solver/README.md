@@ -1,12 +1,11 @@
 # 3-SAT solvers (a side quest)
 
-Nothing to do with container redemption. This folder holds two small 3-SAT solvers written to see, first-hand, why nobody has collected the $1 million prize for P versus NP. Written and measured November 22, 2026.
+Nothing to do with container redemption. This folder holds two small SAT solvers written to see, first-hand, why nobody has collected the $1 million prize for P versus NP. Written and measured November 22, 2026.
 
 | File | What it is |
 | --- | --- |
 | [sat3.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/sat3.py) | Plain backtracking search (DPLL) with unit propagation |
 | [cdcl.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/cdcl.py) | The same search with clause learning, backjumping, activity-based branching, phase saving, restarts, and learned-clause cleanup (CDCL) |
-
 | [structured.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/structured.py) | Runs both solvers on four families of structured problems |
 
 All three are pure Python with no dependencies.
