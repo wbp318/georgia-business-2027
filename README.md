@@ -532,7 +532,7 @@ What we found:
 | [correspondence/](https://github.com/wbp318/maine-business-2027/tree/main/correspondence) | Outgoing email drafts and reply notes, starting with the [DEP email](https://github.com/wbp318/maine-business-2027/blob/main/correspondence/dep-email.md) |
 | [.github/workflows/ci.yml](https://github.com/wbp318/maine-business-2027/blob/main/.github/workflows/ci.yml) | CI: keeps PLAN.md in sync, renders every Mermaid diagram, checks the plan HTML, blocks private files, reports dead links |
 | [.github/scripts/](https://github.com/wbp318/maine-business-2027/tree/main/.github/scripts) | Helper scripts the CI runs |
-| [LICENSE](https://github.com/wbp318/maine-business-2027/blob/main/LICENSE) | All rights reserved. Viewing only; no copying or commercial use without both partners' written permission |
+| [LICENSE](https://github.com/wbp318/maine-business-2027/blob/main/LICENSE) | All rights reserved. Viewing only; no copying or commercial use without the owner's written permission |
 | [.gitattributes](https://github.com/wbp318/maine-business-2027/blob/main/.gitattributes) | Linguist overrides so every file type shows in the language bar |
 | [.gitignore](https://github.com/wbp318/maine-business-2027/blob/main/.gitignore) | Keeps correspondence drafts and partner documents (the private folder) out of the repo |
 
@@ -551,4 +551,4 @@ A Parish Brewing label reads "OK+ 10¢ MI" on its deposit line. Oklahoma has nev
 
 ## License
 
-Copyright (c) 2026 William Brooks Parker and Brandon Cormier. All rights reserved. This repository is published for viewing only; see [LICENSE](https://github.com/wbp318/maine-business-2027/blob/main/LICENSE).
+Copyright (c) 2026 William Brooks Parker. All rights reserved. This repository is published for viewing only; see [LICENSE](https://github.com/wbp318/maine-business-2027/blob/main/LICENSE).
