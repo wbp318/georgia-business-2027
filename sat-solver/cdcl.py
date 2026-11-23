@@ -23,15 +23,17 @@ def luby(i):
     return 1 << (k - 1)
 
 
-def solve(n, clauses, restart_unit=100):
-    """Return (model or None, stats dict)."""
+def solve(n, clauses, restart_unit=100, deadline=None):
+    """Return (model or None, stats dict). Clauses may have any length.
+    Raises TimeoutError past `deadline` (perf_counter time)."""
     idx = lambda lit: 2 * abs(lit) + (lit < 0)
     cls = [list(c) for c in clauses]
     n_orig = len(cls)
     watches = [[] for _ in range(2 * n + 2)]
     for ci, c in enumerate(cls):
-        watches[idx(c[0])].append(ci)
-        watches[idx(c[1])].append(ci)
+        if len(c) >= 2:
+            watches[idx(c[0])].append(ci)
+            watches[idx(c[1])].append(ci)
     val = [0] * (n + 1)
     level = [0] * (n + 1)
     reason = [-1] * (n + 1)
@@ -155,12 +157,20 @@ def solve(n, clauses, restart_unit=100):
             live_learnts -= 1
             st["deleted"] += 1
 
+    for c in cls:                               # empty and unit clauses
+        if not c or (len(c) == 1 and value(c[0]) == -1):
+            return None, st
+        if len(c) == 1 and value(c[0]) == 0:
+            assign(c[0], -1)
+
     since_restart, limit = 0, restart_unit * luby(1)
     while True:
         confl = propagate()
         if confl != -1:
             st["conflicts"] += 1
             since_restart += 1
+            if deadline is not None and time.perf_counter() > deadline:
+                raise TimeoutError
             if not trail_lim:
                 return None, st
             learnt, back = analyze(confl)

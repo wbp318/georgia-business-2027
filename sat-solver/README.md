@@ -7,14 +7,16 @@ Nothing to do with container redemption. This folder holds two small 3-SAT solve
 | [sat3.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/sat3.py) | Plain backtracking search (DPLL) with unit propagation |
 | [cdcl.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/cdcl.py) | The same search with clause learning, backjumping, activity-based branching, phase saving, restarts, and learned-clause cleanup (CDCL) |
 
-Both are pure Python with no dependencies.
+| [structured.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/structured.py) | Runs both solvers on four families of structured problems |
 
-## What the test does
+All three are pure Python with no dependencies.
+
+## Random formulas: what the test does
 
 1. **Correctness.** Each solver is checked against brute force on small random formulas, and every satisfying assignment it returns is checked against the formula.
 2. **Scaling.** Both solvers run on the same random 3-SAT formulas at 4.26 clauses per variable, the ratio where random formulas are hardest. Sizes grow by 25 variables until the median time for one size passes the budget.
 
-## Results
+## Random formulas: results
 
 Fifteen formulas per size. Times are medians on one laptop, so the growth matters, not the absolute numbers.
 
@@ -34,15 +36,74 @@ Fifteen formulas per size. Times are medians on one laptop, so the growth matter
 - **It is still exponential.** In an earlier DPLL-only run, time doubled about every 12 variables. CDCL's time doubles about every 14.5 variables. Learning stretches the curve; it does not flatten it.
 - **Extrapolated from eight points, so order-of-magnitude only:** CDCL would need about two months at 500 variables and about four billion years at 1,000.
 
+## Structured problems
+
+Random formulas are close to the worst case for clause learning. These four families have the kind of structure real problems have. One run per size for the adder and pigeonhole families and the median of three for the other two, with a 10-second limit per run. After a solver times out, larger sizes are skipped for it.
+
+**Adder equivalence (unsatisfiable).** Two different gate-level designs of an n-bit adder, with a claim that some output differs. This is circuit verification in miniature.
+
+| Bits | Variables | DPLL decisions | DPLL seconds | CDCL conflicts | CDCL seconds |
+| --- | --- | --- | --- | --- | --- |
+| 2 | 32 | 31 | 0.001 | 27 | 0.002 |
+| 4 | 62 | 511 | 0.027 | 95 | 0.007 |
+| 6 | 92 | 8,191 | 0.251 | 176 | 0.009 |
+| 8 | 122 | 131,071 | 3.789 | 375 | 0.022 |
+| 12 | 182 | timeout | over 10 | 645 | 0.061 |
+| 16 | 242 | skipped | | 545 | 0.047 |
+| 24 | 362 | skipped | | 603 | 0.083 |
+| 32 | 482 | skipped | | 679 | 0.174 |
+
+**Buried contradiction (unsatisfiable).** Five pigeons in four holes, hidden among independent, easily satisfied blocks of 12 variables that share nothing with it.
+
+| Blocks | Variables | DPLL decisions | DPLL seconds | CDCL conflicts | CDCL seconds |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 32 | 2,344 | 0.019 | 29 | 0.001 |
+| 2 | 44 | 436,133 | 3.610 | 29 | 0.001 |
+| 3 | 56 | timeout | over 10 | 30 | 0.001 |
+| 4 | 68 | skipped | | 30 | 0.001 |
+| 8 | 116 | skipped | | 33 | 0.001 |
+| 16 | 212 | skipped | | 36 | 0.002 |
+| 32 | 404 | skipped | | 49 | 0.005 |
+
+**Latin square completion (satisfiable).** Fill in a Latin square with 42% of its cells blank, a generalized Sudoku.
+
+| Order | Variables | DPLL decisions | DPLL seconds | CDCL conflicts | CDCL seconds |
+| --- | --- | --- | --- | --- | --- |
+| 6 | 216 | 0 | 0.001 | 0 | 0.001 |
+| 9 | 729 | 2 | 0.007 | 0 | 0.004 |
+| 12 | 1,728 | 4 | 0.024 | 0 | 0.015 |
+| 15 | 3,375 | 19 | 0.085 | 8 | 0.064 |
+| 18 | 5,832 | 7 | 0.258 | 64 | 0.143 |
+| 21 | 9,261 | timeout | over 10 | 671 | 1.054 |
+
+**Pigeonhole (unsatisfiable).** One more pigeon than holes, on its own.
+
+| Holes | Variables | DPLL decisions | DPLL seconds | CDCL conflicts | CDCL seconds |
+| --- | --- | --- | --- | --- | --- |
+| 4 | 20 | 51 | 0.000 | 28 | 0.001 |
+| 5 | 30 | 374 | 0.003 | 151 | 0.006 |
+| 6 | 42 | 3,245 | 0.033 | 799 | 0.078 |
+| 7 | 56 | 32,780 | 0.374 | 5,468 | 1.297 |
+| 8 | 72 | 378,343 | 4.799 | timeout | over 10 |
+| 9 | 90 | timeout | over 10 | skipped | |
+
+What these show:
+
+- **Adder:** DPLL's work multiplies by 16 for every two bits (511, 8,191, 131,071 are 2^9, 2^13, 2^17, each minus one). CDCL's conflicts stay under 700 from 12 to 32 bits. It learns that each bit position matches and never re-proves it.
+- **Buried contradiction:** DPLL re-proves the same small contradiction under every way of satisfying the unrelated blocks, so two blocks cost about 190 times one. CDCL learns clauses that mention only the pigeons and is unaffected by the clutter: 29 conflicts at one block, 49 at thirty-two.
+- **Latin square:** both are fine until order 21, where most DPLL runs get stuck in a bad early choice. Restarts and learning get CDCL out in about a second.
+- **Pigeonhole:** structure is not the same as easy. Learning cuts the search about six-fold but both grow roughly ten-fold per hole, and CDCL's extra bookkeeping makes it the slower of the two here. This family is proven to need exponentially long proofs in the reasoning system clause learning uses, so no CDCL solver can do well on it.
+
 ## Why this wins no prize
 
-A proof that P = NP needs an algorithm that is fast on every possible input, with a proof of that bound. A solver that looks fast in tests proves nothing, and these don't even look fast. Clause learning does much better on structured problems from industry than on random formulas like these, but every known solver has inputs that take exponential time.
+A proof that P = NP needs an algorithm that is fast on every possible input, with a proof of that bound. A solver that looks fast in tests proves nothing, and these don't even look fast. Clause learning does far better on structured problems than on random ones, as the tables above show, but every known solver has inputs that take exponential time, and pigeonhole is one of them.
 
 ## Run it
 
 ```
 python sat-solver/sat3.py 6
 python sat-solver/cdcl.py 10 200
+python sat-solver/structured.py 10
 ```
 
-The first number is the median-seconds budget at which the size ladder stops. For cdcl.py, the second is the largest size at which DPLL is also run for comparison. The full CDCL comparison takes several minutes.
+The first number is the median-seconds budget at which the size ladder stops. For cdcl.py, the second is the largest size at which DPLL is also run for comparison. The full CDCL comparison takes several minutes. For structured.py the number is the time limit per run in seconds; add family names (adder, buried, latin, pigeon) to run only those.

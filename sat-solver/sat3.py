@@ -9,8 +9,9 @@ import sys
 import time
 
 
-def solve(n, clauses):
-    """Return (model or None, decisions). model[v] is True/False for v in 1..n."""
+def solve(n, clauses, deadline=None):
+    """Return (model or None, decisions). model[v] is True/False for v in 1..n.
+    Clauses may have any length. Raises TimeoutError past `deadline` (perf_counter time)."""
     idx = lambda lit: 2 * abs(lit) + (lit < 0)
     val = [0] * (n + 1)                      # 0 unassigned, 1 true, -1 false
     watches = [[] for _ in range(2 * n + 2)]
@@ -19,8 +20,9 @@ def solve(n, clauses):
     for ci, c in enumerate(cls):
         for lit in c:
             occ[idx(lit)] += 1
-        watches[idx(c[0])].append(ci)
-        watches[idx(c[1])].append(ci)
+        if len(c) >= 2:
+            watches[idx(c[0])].append(ci)
+            watches[idx(c[1])].append(ci)
     # Branch on the most frequent variables first, trying the majority sign first.
     order = sorted(range(1, n + 1), key=lambda v: -(occ[2 * v] + occ[2 * v + 1]))
     first = [0] + [1 if occ[2 * v] >= occ[2 * v + 1] else -1 for v in range(1, n + 1)]
@@ -77,6 +79,12 @@ def solve(n, clauses):
                 return True
         return False
 
+    for c in cls:                            # empty and unit clauses
+        if not c or (len(c) == 1 and value(c[0]) == -1):
+            return None, decisions
+        if len(c) == 1 and value(c[0]) == 0:
+            assign(c[0])
+
     start = 0
     while True:
         if not propagate(start):
@@ -88,6 +96,8 @@ def solve(n, clauses):
         if v is None:
             return [None] + [val[u] == 1 for u in range(1, n + 1)], decisions
         decisions += 1
+        if deadline is not None and time.perf_counter() > deadline:
+            raise TimeoutError
         lit = v * first[v]
         levels.append((len(trail), lit, False))
         start = len(trail)

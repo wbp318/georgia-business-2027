@@ -25,7 +25,7 @@ The catch is that the business only exists if the law pays independent redemptio
 | --- | --- |
 | [georgia/](https://github.com/wbp318/georgia-business-2027/tree/main/georgia) | The Georgia brief |
 | [maine/](https://github.com/wbp318/georgia-business-2027/tree/main/maine) | The archived Maine plan: [PLAN.md](https://github.com/wbp318/georgia-business-2027/blob/main/maine/PLAN.md), diagrams, grants, ideas, internships, correspondence |
-| [sat-solver/](https://github.com/wbp318/georgia-business-2027/tree/main/sat-solver) | Off topic: two small 3-SAT solvers and a test of how their running time grows |
+| [sat-solver/](https://github.com/wbp318/georgia-business-2027/tree/main/sat-solver) | Off topic: two small SAT solvers, tested on random and structured problems to see how their running time grows |
 | [scripts/build_docs.py](https://github.com/wbp318/georgia-business-2027/blob/main/scripts/build_docs.py) | Rebuilds the Maine plan's PLAN.md and README charts |
 | [.github/workflows/ci.yml](https://github.com/wbp318/georgia-business-2027/blob/main/.github/workflows/ci.yml) | CI: keeps the Maine docs in sync, renders every Mermaid diagram, checks the plan HTML, blocks private files, reports dead links |
 | [LICENSE](https://github.com/wbp318/georgia-business-2027/blob/main/LICENSE) | All rights reserved. Viewing only |
