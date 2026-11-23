@@ -4,10 +4,10 @@ How to bring students and faculty from Maine's public universities and community
 
 | Page | Covers |
 | --- | --- |
-| [forestry-ag-environment.md](https://github.com/wbp318/maine-business-2027/blob/main/internships/forestry-ag-environment.md) | Forest Resources, Extension, animal science, Mitchell Center, SARE graduate grants, GIS internships |
-| [tech-and-business.md](https://github.com/wbp318/maine-business-2027/blob/main/internships/tech-and-business.md) | CS and engineering capstones, UMA CIS, Black Bear Consulting Corps, Innovate for Maine, USM, community colleges |
-| [project-briefs.md](https://github.com/wbp318/maine-business-2027/blob/main/internships/project-briefs.md) | Eleven ready-to-send project pitches |
-| [hiring-rules.md](https://github.com/wbp318/maine-business-2027/blob/main/internships/hiring-rules.md) | Minimum wage, unpaid internship test, payroll, I-9, workers' comp, remote supervision, IP |
+| [forestry-ag-environment.md](https://github.com/wbp318/maine-business-2027/blob/main/maine/internships/forestry-ag-environment.md) | Forest Resources, Extension, animal science, Mitchell Center, SARE graduate grants, GIS internships |
+| [tech-and-business.md](https://github.com/wbp318/maine-business-2027/blob/main/maine/internships/tech-and-business.md) | CS and engineering capstones, UMA CIS, Black Bear Consulting Corps, Innovate for Maine, USM, community colleges |
+| [project-briefs.md](https://github.com/wbp318/maine-business-2027/blob/main/maine/internships/project-briefs.md) | Eleven ready-to-send project pitches |
+| [hiring-rules.md](https://github.com/wbp318/maine-business-2027/blob/main/maine/internships/hiring-rules.md) | Minimum wage, unpaid internship test, payroll, I-9, workers' comp, remote supervision, IP |
 
 ## The short version
 
