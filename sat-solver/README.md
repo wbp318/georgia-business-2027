@@ -5,7 +5,7 @@ Nothing to do with container redemption. This folder holds two small SAT solvers
 | File | What it is |
 | --- | --- |
 | [sat3.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/sat3.py) | Plain backtracking search (DPLL) with unit propagation |
-| [cdcl.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/cdcl.py) | The same search with clause learning, backjumping, activity-based branching, phase saving, restarts, and learned-clause cleanup (CDCL) |
+| [cdcl.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/cdcl.py) | The same search with clause learning, backjumping, activity-based branching, phase saving, restarts, and learned-clause cleanup (CDCL), plus a counting check that runs once before search |
 | [structured.py](https://github.com/wbp318/georgia-business-2027/blob/main/sat-solver/structured.py) | Runs both solvers on four families of structured problems |
 
 All three are pure Python with no dependencies.
@@ -75,27 +75,51 @@ Random formulas are close to the worst case for clause learning. These four fami
 | 18 | 5,832 | 7 | 0.258 | 64 | 0.143 |
 | 21 | 9,261 | timeout | over 10 | 671 | 1.054 |
 
-**Pigeonhole (unsatisfiable).** One more pigeon than holes, on its own.
+**Pigeonhole (unsatisfiable).** One more pigeon than holes, on its own, with variable names and clause order scrambled. The CDCL column is shown with its counting check off and on.
 
-| Holes | Variables | DPLL decisions | DPLL seconds | CDCL conflicts | CDCL seconds |
-| --- | --- | --- | --- | --- | --- |
-| 4 | 20 | 51 | 0.000 | 28 | 0.001 |
-| 5 | 30 | 374 | 0.003 | 151 | 0.006 |
-| 6 | 42 | 3,245 | 0.033 | 799 | 0.078 |
-| 7 | 56 | 32,780 | 0.374 | 5,468 | 1.297 |
-| 8 | 72 | 378,343 | 4.799 | timeout | over 10 |
-| 9 | 90 | timeout | over 10 | skipped | |
+| Holes | Variables | DPLL decisions | DPLL seconds | CDCL conflicts, check off | CDCL seconds, check off | CDCL conflicts, check on | CDCL seconds, check on |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 4 | 20 | 29 | 0.000 | 32 | 0.001 | 0 | 0.000 |
+| 5 | 30 | 193 | 0.002 | 148 | 0.006 | 0 | 0.000 |
+| 6 | 42 | 1,777 | 0.023 | 991 | 0.114 | 0 | 0.000 |
+| 7 | 56 | 16,364 | 0.227 | 8,096 | 1.897 | 0 | 0.000 |
+| 8 | 72 | 139,200 | 2.240 | timeout | over 10 | 0 | 0.001 |
+| 9 | 90 | timeout | over 10 | skipped | | 0 | 0.001 |
+| 12 | 156 | skipped | | skipped | | 0 | 0.002 |
+| 20 | 420 | skipped | | skipped | | 0 | 0.008 |
+| 40 | 1,640 | skipped | | skipped | | 0 | 0.071 |
+| 60 | 3,660 | skipped | | skipped | | 0 | 0.275 |
+
+The adder, buried-contradiction, and Latin square tables above were measured before the counting check existed. With it on, the adder and Latin square numbers are unchanged, and the buried contradiction is refuted with no search at every size.
 
 What these show:
 
 - **Adder:** DPLL's work multiplies by 16 for every two bits (511, 8,191, 131,071 are 2^9, 2^13, 2^17, each minus one). CDCL's conflicts stay under 700 from 12 to 32 bits. It learns that each bit position matches and never re-proves it.
 - **Buried contradiction:** DPLL re-proves the same small contradiction under every way of satisfying the unrelated blocks, so two blocks cost about 190 times one. CDCL learns clauses that mention only the pigeons and is unaffected by the clutter: 29 conflicts at one block, 49 at thirty-two.
 - **Latin square:** both are fine until order 21, where most DPLL runs get stuck in a bad early choice. Restarts and learning get CDCL out in about a second.
-- **Pigeonhole:** structure is not the same as easy. Learning cuts the search about six-fold but both grow roughly ten-fold per hole, and CDCL's extra bookkeeping makes it the slower of the two here. This family is proven to need exponentially long proofs in the reasoning system clause learning uses, so no CDCL solver can do well on it.
+- **Pigeonhole:** structure is not the same as easy. By search alone both solvers grow roughly ten-fold per hole, and CDCL's extra bookkeeping makes it the slower of the two. This family is proven to need exponentially long proofs in the reasoning system clause learning uses, so no amount of tuning the search fixes it. It takes a different kind of reasoning.
+
+## Beating pigeonhole: the counting check
+
+Clause learning cannot count. The fix is to count before searching:
+
+1. **Find at-most-one groups.** A two-literal clause says two things cannot both be true. A set of literals where every pair clashes that way can have at most one member true. For pigeonhole, each hole is one such group.
+2. **Pick clauses that share no literals.** Each needs a true literal of its own. For pigeonhole, these are the pigeons.
+3. **Match clauses to groups.** If the clauses cannot all be given distinct groups, the formula is unsatisfiable. Sixty-one pigeons cannot be matched to sixty holes.
+
+That replaces an exponential search with a polynomial matching: 60 holes, with 3,660 variables and 109,861 clauses, takes 0.28 seconds and zero conflicts.
+
+It was checked for soundness on 7,000 small formulas against brute force (4,000 random and 3,000 assignment-style ones with missing constraints, noise clauses, and flipped signs): the solver's answer always matched, and the check never fired on a satisfiable formula.
+
+What it does not do:
+
+- **It is a special-purpose rule, not a general speed-up.** It fired on only 21 of the 1,707 unsatisfiable assignment-style test formulas and on none of the random ones. Most contradictions are not counting arguments visible at the top level.
+- **It only sees one encoding.** If the at-most-one constraints are written another way (for example with helper variables instead of pairwise clauses), or the pigeonhole only appears after some decisions, the check finds nothing and the solver falls back to exponential search.
+- **There is always another family.** Parity constraints are the next classic one that defeats clause learning, and they need yet another technique (Gaussian elimination). Every solver is a collection of such techniques, and each one has hard inputs left over.
 
 ## Why this wins no prize
 
-A proof that P = NP needs an algorithm that is fast on every possible input, with a proof of that bound. A solver that looks fast in tests proves nothing, and these don't even look fast. Clause learning does far better on structured problems than on random ones, as the tables above show, but every known solver has inputs that take exponential time, and pigeonhole is one of them.
+A proof that P = NP needs an algorithm that is fast on every possible input, with a proof of that bound. A solver that looks fast in tests proves nothing, and these don't even look fast. Clause learning does far better on structured problems than on random ones, as the tables above show, but every known solver has inputs that take exponential time. Adding the counting check moved pigeonhole from that list to the solved list and left the list non-empty.
 
 ## Run it
 
@@ -105,4 +129,4 @@ python sat-solver/cdcl.py 10 200
 python sat-solver/structured.py 10
 ```
 
-The first number is the median-seconds budget at which the size ladder stops. For cdcl.py, the second is the largest size at which DPLL is also run for comparison. The full CDCL comparison takes several minutes. For structured.py the number is the time limit per run in seconds; add family names (adder, buried, latin, pigeon) to run only those.
+The first number is the median-seconds budget at which the size ladder stops. For cdcl.py, the second is the largest size at which DPLL is also run for comparison. The full CDCL comparison takes several minutes. For structured.py the number is the time limit per run in seconds; add family names (adder, buried, latin, pigeon) to run only those, and --no-counting to switch the counting check off.

@@ -23,9 +23,76 @@ def luby(i):
     return 1 << (k - 1)
 
 
-def solve(n, clauses, restart_unit=100, deadline=None):
+def counting_refutes(clauses, value):
+    """Sound counting check, run once before search. True means UNSAT.
+
+    Binary clauses say which pairs of literals cannot both be true. Group the
+    literals into sets where at most one can be true (cliques of such pairs).
+    Then take clauses that share no literals: each needs a true literal of its
+    own, and each group can supply at most one. If the clauses cannot all be
+    matched to distinct groups, the formula is unsatisfiable. `value(lit)` gives
+    the top-level assignment so far (1 true, -1 false, 0 unassigned)."""
+    live = []
+    for c in clauses:
+        if any(value(l) == 1 for l in c):
+            continue
+        live.append([l for l in c if value(l) == 0])
+    clash = {}                                   # literal -> literals it cannot be true with
+    for c in live:
+        if len(c) == 2:
+            a, b = -c[0], -c[1]
+            clash.setdefault(a, set()).add(b)
+            clash.setdefault(b, set()).add(a)
+    group = {}                                   # literal -> id of its at-most-one group
+    groups = 0
+    for l in sorted(clash, key=lambda l: -len(clash[l])):
+        if l in group:
+            continue
+        clique = [l]
+        for m in clash[l]:
+            if m not in group and all(m in clash[k] for k in clique[1:]):
+                clique.append(m)
+        if len(clique) > 1:
+            for m in clique:
+                group[m] = groups
+            groups += 1
+    used, picked = set(), []
+    for c in sorted(live, key=len):              # clauses with no shared literals
+        if len(c) >= 2 and all(l in group for l in c) and not used.intersection(c):
+            used.update(c)
+            picked.append(sorted({group[l] for l in c}))
+    if len(picked) <= 1:
+        return False
+    owner = {}                                   # group -> index of the clause holding it
+
+    def augment(start):
+        """Give clause `start` a group, moving other clauses if needed."""
+        parent, stack, seen = {}, [start], {start}
+        while stack:
+            ci = stack.pop()
+            for g in picked[ci]:
+                if g not in owner:               # free group: shift along the path back to start
+                    while True:
+                        prev = parent.get(ci)
+                        owner[g] = ci
+                        if prev is None:
+                            return True
+                        ci, g = prev
+                    continue
+                nxt = owner[g]
+                if nxt not in seen:
+                    seen.add(nxt)
+                    parent[nxt] = (ci, g)
+                    stack.append(nxt)
+        return False
+
+    return not all(augment(ci) for ci in range(len(picked)))
+
+
+def solve(n, clauses, restart_unit=100, deadline=None, counting=True):
     """Return (model or None, stats dict). Clauses may have any length.
-    Raises TimeoutError past `deadline` (perf_counter time)."""
+    Raises TimeoutError past `deadline` (perf_counter time). With `counting`,
+    a counting check runs once before search (see counting_refutes)."""
     idx = lambda lit: 2 * abs(lit) + (lit < 0)
     cls = [list(c) for c in clauses]
     n_orig = len(cls)
@@ -162,6 +229,13 @@ def solve(n, clauses, restart_unit=100, deadline=None):
             return None, st
         if len(c) == 1 and value(c[0]) == 0:
             assign(c[0], -1)
+
+    if counting:
+        if propagate() != -1:
+            return None, st
+        if counting_refutes(cls, value):
+            st["counting"] = 1
+            return None, st
 
     since_restart, limit = 0, restart_unit * luby(1)
     while True:

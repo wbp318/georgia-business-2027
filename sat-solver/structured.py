@@ -11,8 +11,15 @@ import statistics
 import sys
 import time
 
-from cdcl import solve as cdcl
+from cdcl import solve as cdcl_solve
 from sat3 import satisfies, solve as dpll
+
+
+def cdcl(n, clauses, deadline=None):
+    return cdcl_solve(n, clauses, deadline=deadline, counting=COUNTING)
+
+
+COUNTING = True
 
 
 class CNF:
@@ -73,8 +80,12 @@ def pigeon_clauses(f, pigeons, holes):
 
 
 def pigeon(holes, rng):
+    """Pigeonhole with variable names, clause order, and literal order scrambled."""
     f = CNF()
     pigeon_clauses(f, holes + 1, holes)
+    names = [0] + rng.sample(range(1, f.n + 1), f.n)
+    f.clauses = [rng.sample([names[l] if l > 0 else -names[-l] for l in c], len(c))
+                 for c in rng.sample(f.clauses, len(f.clauses))]
     return f, False
 
 
@@ -123,7 +134,7 @@ FAMILIES = {
     "adder": ("Adder equivalence (UNSAT)", "bits", adder, [2, 4, 6, 8, 12, 16, 24, 32], 1),
     "buried": ("Buried contradiction (UNSAT)", "blocks", buried, [1, 2, 3, 4, 6, 8, 16, 32], 3),
     "latin": ("Latin square completion (SAT)", "order", latin, [6, 9, 12, 15, 18, 21], 3),
-    "pigeon": ("Pigeonhole (UNSAT)", "holes", pigeon, [4, 5, 6, 7, 8, 9], 1),
+    "pigeon": ("Pigeonhole (UNSAT)", "holes", pigeon, [4, 5, 6, 7, 8, 9, 12, 20, 40, 60], 1),
 }
 
 
@@ -143,8 +154,12 @@ def run(solver, f, limit):
 
 
 def main():
-    limit = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0
-    names = sys.argv[2:] or list(FAMILIES)
+    global COUNTING
+    args = [a for a in sys.argv[1:] if a != "--no-counting"]
+    COUNTING = "--no-counting" not in sys.argv
+    limit = float(args[0]) if args else 10.0
+    names = args[1:] or list(FAMILIES)
+    print("CDCL counting check:", "on" if COUNTING else "off")
     for name in names:
         title, unit, gen, sizes, seeds = FAMILIES[name]
         print(f"\n{title}, {seeds} instance(s) per size, {limit:g} s limit per run")
